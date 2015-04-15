@@ -1,7 +1,8 @@
-### Install
+### Install patches for port changed
+### assume you have download patches from github
+#  git clone https://github.com/KevinHuang/1knowPortChanged.git  /opt/1knowPortChanged
 
-cd /opt/
-git clone https://github.com/KevinHuang/1knowPortChanged.git  1knowPortChanged
+cd /opt/1knowPortChanged
 
 cd 1knowPortChanged
 cp welcome.js  /opt/1know_standalone/public/js/welcome.js

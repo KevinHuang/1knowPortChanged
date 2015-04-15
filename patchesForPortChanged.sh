@@ -4,7 +4,6 @@
 
 cd /opt/1knowPortChanged
 
-cd 1knowPortChanged
 cp welcome.js  /opt/1know_standalone/public/js/welcome.js
 cp knowledge.html.erb  /opt/1know_standalone/app/views/page/knowledge.html.erb
 cp group.html.erb  /opt/1know_standalone/app/views/page/group.html.erb

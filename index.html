@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>1know File Chooser</title>
+    <link rel="stylesheet" href="/library/bootstrap/css/bootstrap.min.css"></link>
+    <link rel="stylesheet" type="text/css" href="/library/font-awesome/css/font-awesome.min.css"></link>
+    <link rel="stylesheet" type="text/css" href="/library/html5-file-uploader/styles.css" />
+    <style type="text/css">
+        body {
+            width: 100%;
+            margin-top: -20px;
+            font-family: Microsoft JhengHei, arial, helvetica, sans-serif;
+        }
+        #dropped-files tr td {
+            vertical-align: middle;
+        }
+        .tab {
+            margin-bottom: 20px;
+            position: relative;
+            background: #fff;
+            overflow: hidden;
+            margin: 0 auto;
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.5;
+            font-weight: 500;
+        }
+        .tabs {
+            position: relative;
+            overflow: hidden;
+            margin: 0;
+            width: 25%;
+        }
+        .tabs li {
+            width: 50%;
+            float: left;
+            line-height: 50px;
+            overflow: hidden;
+            padding: 0;
+            position: relative;
+        }
+        .tabs a {
+            border:4px solid white;
+            text-align: center;
+            background-color: #FFF;
+            color: #000;
+            font-weight: 500;
+            display: block;
+            letter-spacing: 0;
+            outline: none;
+            padding: 0 20px;
+            text-decoration: none;
+            -webkit-transition: all 0.2s ease-in-out;
+            -moz-transition: all 0.2s ease-in-out;
+            transition: all 0.2s ease-in-out;
+        }
+        .tabs a:hover {
+            border-bottom: 4px solid #70B1E8;
+            background-color: #FFF;
+        }
+        a.selected {
+            font-weight: bold;
+            border-bottom: 4px solid #428bca;
+            background-color: #FFF;
+        }
+        .tabs_item {
+            display: none;
+            padding: 30px 0;
+        }
+        .tabs_item h4 {
+            font-weight: bold;
+            color: #87AFD3;
+            font-size: 20px;
+        }
+        .tabs_item img {
+            width: 200px;
+            float: left;
+            margin-right: 30px;
+        }
+        .tabs_item:first-child {
+            display: block;
+        }
+        .current a {
+            color: #000;
+        }
+        .uploadimage-dragndrop {
+            border: 2px dashed #DDD;
+            margin: 20px 0;
+            padding: 50px 20px;
+            text-align: center;
+        }
+        .uploadimage-dragndrop.hover {
+            border: 2px dashed #428bca;
+            color: #428bca;
+            font-style: #428bca;
+        }
+        .mysearch {
+            background-color: #e1e1e1;
+            width: 100%;
+            padding-top: 10px;
+            padding-bottom: 10px;
+            margin-bottom: auto;
+            margin-top: 5px;
+            padding: 15px 15px;
+        }
+        .mysearchbar {
+            width: 362px;
+            height: 27px;
+        }
+        .mytable {
+            border: 2px #000;
+            width: 100%;
+            margin: 0 auto;
+            font-size: 13px;
+        }
+        .mytable-title {
+            background: #eee;
+        }
+        .mybottombar {
+            border-top: 1px solid #e5e5e5;
+            height: 67px;
+            background-color: #FFF;
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+        }
+        .mytable tr td {
+            cursor: pointer;
+        }
+        .mytable tbody>tr>td {
+            vertical-align: middle;
+        }
+        .list-item {
+            border-left: 4px solid #FFF;
+        }
+        .list-item:hover {
+            border-left: 4px solid #428bca;
+        }
+        .list-item-click {
+            background-color: #428bca;
+            color: #FFF;
+        }
+        .mynavbar {
+            box-shadow: 0 0 4px rgba(0, 0, 0, .14), 0 4px 8px rgba(0, 0, 0, .28);
+        }
+        .mylist {
+            overflow-y: auto;
+            height: 360px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div layout="vertical" layout-fill ng-app="fileChooser" ng-controller="mainCtrl">
+        <div class="mynavbar" style="margin-bottom:auto;">
+            <div style="margin:20px;height:20px;">
+                <div style="font-size:20px;padding:10px;">上传{{config.uploadTypeCN}}到 {{config.unitName}} 单元</div>
+            </div>
+            <div>
+                <ul class="tabs" style="padding-left: 0px;">
+                    <li>
+                        <a class="selected">添加文件</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div id="fileUpload" ng-controller="uploaderCtrl" style="margin:20px;">
+            <%= form_tag({:action=>:uploadFile}, :multipart => true) do %>
+                <input type="file" style="display:none;" multiple="multiple" name="upload" id="upload-input" />
+            <% end %>
+            <div id="dragndropimage" class="uploadimage-dragndrop">
+                <!--ProgressBar-->
+                <div ng-repeat="u in uploads">
+                    <div class="progress" ng-class="{'uploadimage-uploadcompleted': u.uploadSize == u.fileSize }">
+                        <div class="progress">
+                            <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 0%;" ng-style="{ width: u.progress + '%' }"></div>
+                        </div>
+                        <div class="progress">
+                            <strong>{{u.fileName}}</strong>
+                            <span>{{formatFileSize(u.fileSize)}}</span>
+                        </div>
+                    </div>
+                </div>
+                <!--Text-->
+                <div class="uploadimage-text" style="font-size: 20px;">拖拽到此上传</div>
+                <div style="font-size: 20px;color: #838383;">或</div>
+                <button class="btn btn-primary" style="margin:5px;" onclick="$('#upload-input').click();">添加文件</button>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" src="/library/jquery/jquery-1.11.0.min.js"></script>
+    <script src="/library/angularjs/angular.js"></script>
+    <script type="text/javascript" src="/library/html5-file-uploader/html5Upload.js"></script>
+    <script type="text/javascript">
+        'use strict';
+        var app = angular.module('fileChooser', [])
+            .controller('mainCtrl', ['$scope','$location',function($scope,$location) {
+                $scope.config = {
+                    uploadAndOver : true
+                };
+                $scope.allowFileExt =
+                { 'doc' : ['.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.pdf' ],
+                  'video' : ['.mp4' ] ,
+                  'image' : ['.jpg' , '.png'] ,
+                }
+                $scope.config.unitName = "<%=@unit['name']%>" || '';
+                $scope.config.uploadType = "<%=@params['type']%>" || 'video';
+                $scope.config.uploadTypeCN = {
+                    'doc'   : '文档',
+                    'video' : '视频',
+                    'image' : '图片',
+                }[$scope.config.uploadType];
+                $scope.config.unit_uqid = "<%=@params['unit_uqid']%>" || '';
+                $scope.windowPostMessage = function(data){
+                    if (window.opener){
+                        window.opener.postMessage(data,[$location.protocol(), '://', $location.host(), ':', $location.port()].join(''));
+                    }
+                    window.close();
+                }
+                $scope.formatFileSize = function(sizeInBytes) {
+                    function trimTrailingZeros(number) {
+                        return number.toFixed(1).replace(/\.0+$/, '');
+                    }
+                    var kiloByte = 1024,megaByte = Math.pow(kiloByte, 2),gigaByte = Math.pow(kiloByte, 3);
+                    if (sizeInBytes < kiloByte) {
+                        return sizeInBytes + ' B';
+                    }
+                    if (sizeInBytes < megaByte) {
+                        return trimTrailingZeros(sizeInBytes / kiloByte) + ' kB';
+                    }
+                    if (sizeInBytes < gigaByte) {
+                        return trimTrailingZeros(sizeInBytes / megaByte) + ' MB';
+                    }
+                    return trimTrailingZeros(sizeInBytes / gigaByte) + ' GB';
+                }
+            }])
+            .controller('uploaderCtrl', ['$scope',function($scope) {
+                $scope.uploads = [];
+                if (html5Upload.fileApiSupported()) {
+                    html5Upload.initialize({
+                        uploadUrl: '/chooser/upload_file',
+                        dropContainer: document.getElementById('dragndropimage'),
+                        inputField: document.getElementById('upload-input'),
+                        key: 'File',
+                        data: {
+                            authenticity_token: $('form input[name="authenticity_token"]').val(),
+                            type : $scope.config.uploadType,
+                            unit_uqid : "<%=@params['unit_uqid']%>" || '',
+                        },
+                        maxSimultaneousUploads: 1,
+                        onFileAdded: function(file) {
+                            var file_ext = '.'+file.file.name.split('.').pop();
+                            if ( !$scope.config.unit_uqid ) {
+                                alert('未选择单元');
+                                return;
+                            }
+                            if ( $scope.allowFileExt[$scope.config.uploadType].indexOf(file_ext) === -1 ) {
+                                alert('上传文档格式不符');
+                                return;
+                            }
+                            $scope.uploads.push(file);
+                            $scope.$digest();
+                            file.on({
+                                onCompleted: function(response) {
+                                    $scope.$digest();
+                                    $scope.windowPostMessage(JSON.stringify({data: JSON.parse(response), type: 'success'}));
+                                },
+                                onProgress: function(progress, fileSize, uploadedBytes) {
+                                    file.progress = progress;
+                                    $scope.$digest();
+                                }
+                            });
+                        }
+                    });
+                }
+            }]);
+    </script>
+</body>
+</html>
